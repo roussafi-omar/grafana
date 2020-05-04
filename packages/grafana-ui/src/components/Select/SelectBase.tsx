@@ -91,12 +91,14 @@ export function SelectBase<T>({
   allowCustomValue = false,
   autoFocus = false,
   backspaceRemovesValue = true,
+  cacheOptions,
   className,
   closeMenuOnSelect = true,
   components,
   defaultOptions,
   defaultValue,
   disabled = false,
+  filterOption,
   formatCreateLabel,
   getOptionLabel,
   getOptionValue,
@@ -106,6 +108,7 @@ export function SelectBase<T>({
   isLoading = false,
   isMulti = false,
   isOpen,
+  isOptionDisabled,
   isSearchable = true,
   loadOptions,
   loadingMessage = 'Loading options...',
@@ -174,6 +177,7 @@ export function SelectBase<T>({
     defaultValue,
     // Also passing disabled, as this is the new Select API, and I want to use this prop instead of react-select's one
     disabled,
+    filterOption,
     getOptionLabel,
     getOptionValue,
     inputValue,
@@ -183,6 +187,7 @@ export function SelectBase<T>({
     isDisabled: disabled,
     isLoading,
     isMulti,
+    isOptionDisabled,
     isSearchable,
     maxMenuHeight,
     maxVisibleValues,
@@ -217,6 +222,7 @@ export function SelectBase<T>({
     ReactSelectComponent = allowCustomValue ? AsyncCreatable : ReactAsyncSelect;
     asyncSelectProps = {
       loadOptions,
+      cacheOptions,
       defaultOptions,
     };
   }
@@ -227,22 +233,7 @@ export function SelectBase<T>({
         components={{
           MenuList: SelectMenu,
           Group: SelectOptionGroup,
-          ValueContainer: (props: any) => {
-            const { menuIsOpen } = props.selectProps;
-            if (
-              Array.isArray(props.children) &&
-              Array.isArray(props.children[0]) &&
-              maxVisibleValues !== undefined &&
-              !(showAllSelectedWhenOpen && menuIsOpen)
-            ) {
-              const [valueChildren, ...otherChildren] = props.children;
-              const truncatedValues = valueChildren.slice(0, maxVisibleValues);
-
-              return <ValueContainer {...props} children={[truncatedValues, ...otherChildren]} />;
-            }
-
-            return <ValueContainer {...props} />;
-          },
+          ValueContainer,
           Placeholder: (props: any) => (
             <div
               {...props.innerProps}
@@ -325,17 +316,21 @@ export function SelectBase<T>({
             zIndex: theme.zIndex.dropdown,
           }),
           //These are required for the menu positioning to function
-          menu: ({ top, bottom, width, position }: any) => ({
+          menu: ({ top, bottom, position }: any) => ({
             top,
             bottom,
-            width,
             position,
             marginBottom: !!bottom ? '10px' : '0',
+            minWidth: '100%',
             zIndex: theme.zIndex.dropdown,
           }),
           container: () => ({
             position: 'relative',
             width: width ? `${8 * width}px` : '100%',
+          }),
+          option: (provided: any, state: any) => ({
+            ...provided,
+            opacity: state.isDisabled ? 0.5 : 1,
           }),
         }}
         className={className}

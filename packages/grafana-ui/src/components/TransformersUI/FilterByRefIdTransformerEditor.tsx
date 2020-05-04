@@ -39,6 +39,12 @@ export class FilterByRefIdTransformerEditor extends React.PureComponent<
     this.initOptions();
   }
 
+  componentDidUpdate(oldProps: FilterByRefIdTransformerEditorProps) {
+    if (this.props.input !== oldProps.input) {
+      this.initOptions();
+    }
+  }
+
   private initOptions() {
     const { input, options } = this.props;
     const configuredOptions = options.include ? options.include.split('|') : [];
@@ -101,7 +107,7 @@ export class FilterByRefIdTransformerEditor extends React.PureComponent<
       <div className="gf-form-inline">
         <div className="gf-form gf-form--grow">
           <div className="gf-form-label width-8">Series refId</div>
-          <HorizontalGroup spacing="xs">
+          <HorizontalGroup spacing="xs" align="flex-start" wrap>
             {options.map((o, i) => {
               const label = `${o.refId}${o.count > 1 ? ' (' + o.count + ')' : ''}`;
               const isSelected = selected.indexOf(o.refId) > -1;
